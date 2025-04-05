@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useCallback } from 'react';
 import { ApiEndpoint } from '@/types/api';
 import { ArrowRight, Copy } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -13,7 +13,7 @@ interface ApiDocumentationProps {
 
 export const ApiDocumentation = ({ endpoint, onToggleView }: ApiDocumentationProps) => {
   const { toast } = useToast();
-  const [activeTab, useState] = useState<string>("shell");
+  const [activeTab, setActiveTab] = useState<string>("shell");
 
   // Helper function to get method badge color
   const getMethodBadgeColor = () => {
@@ -42,7 +42,7 @@ export const ApiDocumentation = ({ endpoint, onToggleView }: ApiDocumentationPro
 --header 'X-REQUEST-ID: stacktics' \\
 --header 'X-DEVICE-ID: stacktics device' \\
 --header 'x-api-key: xpectrum_api_key_123@ai' \\
---header 'Content-Type: application/json'${endpoint.hasBody ? ` \\
+--header 'Content-Type: application/json'${endpoint.hasBody && endpoint.exampleRequestBody ? ` \\
 --data-raw '${JSON.stringify(endpoint.exampleRequestBody || {}, null, 2)}'` : ''}`;
 
     return curlCommand;
@@ -87,7 +87,7 @@ export const ApiDocumentation = ({ endpoint, onToggleView }: ApiDocumentationPro
           <h3 className="text-xl font-medium mb-4">Request</h3>
 
           {/* Query Parameters Table */}
-          {Object.keys(endpoint.queryParams || {}).length > 0 && (
+          {endpoint.queryParams && Object.keys(endpoint.queryParams || {}).length > 0 && (
             <div className="mb-8">
               <h4 className="text-lg font-medium mb-2">Query Params</h4>
               <div className="overflow-hidden rounded-lg border border-border">
@@ -110,7 +110,7 @@ export const ApiDocumentation = ({ endpoint, onToggleView }: ApiDocumentationPro
                             required
                           </span>
                         </td>
-                        <td className="p-3 text-sm">{value}</td>
+                        <td className="p-3 text-sm">{String(value)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -120,7 +120,7 @@ export const ApiDocumentation = ({ endpoint, onToggleView }: ApiDocumentationPro
           )}
 
           {/* Header Parameters Table */}
-          {Object.keys(endpoint.headers || {}).length > 0 && (
+          {endpoint.headers && Object.keys(endpoint.headers || {}).length > 0 && (
             <div className="mb-8">
               <h4 className="text-lg font-medium mb-2">Header Params</h4>
               <div className="overflow-hidden rounded-lg border border-border">
@@ -143,7 +143,7 @@ export const ApiDocumentation = ({ endpoint, onToggleView }: ApiDocumentationPro
                             required
                           </span>
                         </td>
-                        <td className="p-3 text-sm">{value}</td>
+                        <td className="p-3 text-sm">{String(value)}</td>
                       </tr>
                     ))}
                     {/* Add standard headers */}
@@ -268,7 +268,7 @@ fetch("${endpoint.url}", {
     "X-LANG": "en",
     "X-REQUEST-ID": "stacktics",
     "x-api-key": "xpectrum_api_key_123@ai"
-  }${endpoint.hasBody ? `,
+  }${endpoint.hasBody && endpoint.exampleRequestBody ? `,
   body: JSON.stringify(${JSON.stringify(endpoint.exampleRequestBody || {}, null, 2)})` : ''}
 })
 .then(response => response.json())
@@ -290,7 +290,7 @@ headers = {
     "X-REQUEST-ID": "stacktics",
     "x-api-key": "xpectrum_api_key_123@ai"
 }
-${endpoint.hasBody ? `payload = ${JSON.stringify(endpoint.exampleRequestBody || {}, null, 2)}
+${endpoint.hasBody && endpoint.exampleRequestBody ? `payload = ${JSON.stringify(endpoint.exampleRequestBody || {}, null, 2)}
 
 response = requests.${endpoint.method.toLowerCase()}(url, json=payload, headers=headers)` : `response = requests.${endpoint.method.toLowerCase()}(url, headers=headers)`}
 print(response.json())`}
@@ -345,3 +345,5 @@ print(response.json())`}
     </div>
   );
 };
+
+import { useState } from 'react';

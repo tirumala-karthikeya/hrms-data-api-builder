@@ -1,4 +1,3 @@
-
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 export interface ApiEndpoint {
@@ -10,6 +9,10 @@ export interface ApiEndpoint {
   category: string;
   requiresId?: boolean;
   hasBody?: boolean;
+  queryParams?: Record<string, string>;
+  headers?: Record<string, string>;
+  exampleRequestBody?: any;
+  exampleResponse?: any;
 }
 
 export interface ApiParam {

@@ -15,7 +15,7 @@ interface ApiExplorerProps {
 export const ApiExplorer = ({ endpoint, onToggleView }: ApiExplorerProps) => {
   const { toast } = useToast();
   const [idValue, setIdValue] = useState<string>('');
-  const [requestBody, setRequestBody] = useState<string>(endpoint.hasBody ? JSON.stringify(endpoint.exampleRequestBody || {}, null, 2) : '');
+  const [requestBody, setRequestBody] = useState<string>(endpoint.hasBody && endpoint.exampleRequestBody ? JSON.stringify(endpoint.exampleRequestBody || {}, null, 2) : '');
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<string>(endpoint.hasBody ? 'body' : 'params');
