@@ -2,19 +2,20 @@
 import { useState } from 'react';
 import { ApiEndpoint, ApiResponse } from '@/types/api';
 import { fetchApi } from '@/services/api-service';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Copy, Send, ArrowRight, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ApiExplorerProps {
   endpoint: ApiEndpoint;
+  onToggleView: () => void;
 }
 
-export const ApiExplorer = ({ endpoint }: ApiExplorerProps) => {
+export const ApiExplorer = ({ endpoint, onToggleView }: ApiExplorerProps) => {
   const { toast } = useToast();
   const [idValue, setIdValue] = useState<string>('');
-  const [requestBody, setRequestBody] = useState<string>(endpoint.hasBody ? '{}' : '');
+  const [requestBody, setRequestBody] = useState<string>(endpoint.hasBody ? JSON.stringify(endpoint.exampleRequestBody || {}, null, 2) : '');
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<string>(endpoint.hasBody ? 'body' : 'params');
@@ -338,7 +339,7 @@ export const ApiExplorer = ({ endpoint }: ApiExplorerProps) => {
                     </button>
                   </div>
                   <textarea
-                    className="w-full h-64 bg-muted p-4 rounded-md font-mono text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-64 bg-muted p-4 rounded-md font-mono text-sm focus:outline-none focus:ring-1 focus:ring-primary scrollbar-custom"
                     value={requestBody}
                     onChange={(e) => setRequestBody(e.target.value)}
                   />
@@ -352,35 +353,15 @@ export const ApiExplorer = ({ endpoint }: ApiExplorerProps) => {
           <div className="border-b border-border p-4">
             <div className="flex justify-between items-center">
               <h3 className="text-sm font-medium">Response</h3>
-              {response && (
-                <div className="flex items-center gap-2">
-                  <span 
-                    className={cn(
-                      "text-xs px-2 py-0.5 rounded-full",
-                      response.status >= 200 && response.status < 300 
-                        ? "bg-api-get/20 text-api-get" 
-                        : "bg-api-delete/20 text-api-delete"
-                    )}
-                  >
-                    {response.status} {response.statusText}
-                  </span>
-                  {response.time && (
-                    <span className="text-xs text-muted-foreground">
-                      {Math.round(response.time)}ms
-                    </span>
-                  )}
-                  <button
-                    className="text-xs text-primary flex items-center gap-1"
-                    onClick={() => copyToClipboard(formatJSON(response.data))}
-                  >
-                    <Copy className="h-3 w-3" />
-                    Copy
-                  </button>
-                </div>
-              )}
+              <button
+                className="bg-primary text-white px-4 py-1 rounded text-sm"
+                onClick={onToggleView}
+              >
+                Documentation
+              </button>
             </div>
           </div>
-          <div className="flex-1 overflow-auto bg-muted/30 p-4">
+          <div className="flex-1 overflow-auto bg-muted/30 p-4 scrollbar-custom">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
